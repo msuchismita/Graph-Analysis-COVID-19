@@ -1,0 +1,100 @@
+---
+title: "Capstone-EDA"
+author: "Suchismita Moharana"
+date: "7/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(curl)
+library(ggthemes)
+#library(plotly)
+library(viridisLite)
+library(viridis)
+library(dplyr)
+library(scales)
+library(naniar)
+
+```
+
+ 
+```{r}
+covid_data_detail_raw <- read.csv("/Users/suchismitamoharana/Documents/COVID-19_Case_Surveillance_Public_Use_Data_with_Geography.csv")
+```
+
+
+```{r}
+summary(covid_data_detail_raw)
+#vis_miss(covid_data_detail,warn_large_data=FALSE)
+gg_miss_var(covid_data_detail_raw)
+
+```
+
+
+# case_positive_specimen_interval and case_onset_interval columns are having high number of null values (19.7M and 14.7M respectively). Hence removed the columns. 
+```{r}
+covid_data_detail = subset(covid_data_detail_raw, select = -c(case_positive_specimen_interval,case_onset_interval) )
+gg_miss_var(covid_data_detail)
+
+```
+
+
+```{r}
+ggplot(covid_data_detail, aes(x = case_month )) +  geom_bar(stat = "count")   + xlab("\nYear-Month") + ylab ("Number of COVID-19 cases\n") +  ggtitle("Case count for each month") + theme(axis.text.x = element_text(angle=45,hjust=1, size=8)) + scale_y_continuous(labels = unit_format (unit="M",scale=1e-6))
+```
+
+
+```{r}
+covid_data_detail %>% ggplot(mapping = aes (x = case_month, fill = death_yn)) + geom_bar(position = "fill") + ylab("Death Percentage\n")  + xlab("\nYear-Month")  + theme(axis.text.x = element_text(angle=45,hjust=1,size=8)) + ggtitle ("Death Percentage for each Month") 
+
+```
+
+
+
+```{r}
+covid_data_detail %>% count(res_state) -> df_case_count 
+
+ggplot(df_case_count, aes (x = reorder(res_state, n), y = n, fill = reorder(res_state, n) )) + geom_bar(stat = "identity") + scale_fill_viridis (discrete = TRUE, direction = -1) + scale_color_manual(values=c("black", "white")) + theme(axis.text.x = element_text(angle=45,hjust=1, size=8)) + xlab("\nState Code") + ylab ("Total Cases\n") + labs(fill = "State") + ggtitle("Count summary for number of cases by State")
+
+```
+
+
+
+```{r}
+covid_data_detail %>% count(ethnicity) -> df_case_count_e
+
+ggplot(df_case_count_e, aes (x = reorder(ethnicity, n), y = n, fill = reorder(ethnicity, n) )) + geom_bar(stat = "identity") + scale_fill_viridis (discrete = TRUE, direction = -1) + scale_color_manual(values=c("black", "white")) + theme(axis.text.x = element_text(angle=45,hjust=1, size=8)) + xlab("Ethnicity\n") + ylab ("Total Cases\n") + labs(fill = "Ethnicity") + ggtitle("Count summary for number of cases by Ethnicity")
+
+```
+
+
+```{r}
+covid_data_detail %>% count(race) -> df_case_count_r
+
+ggplot(df_case_count_r, aes (x = reorder(race, n), y = n, fill = reorder(race, n) )) + geom_bar(stat = "identity") + scale_fill_viridis (discrete = TRUE, direction = -1) + scale_color_manual(values=c("black", "white")) + theme(axis.text.x = element_text(angle=45,hjust=1, size=8)) + xlab("Race\n") + ylab ("Total Cases\n") + labs(fill = "Race") + ggtitle("Count summary for number of cases by Race")
+
+```
+
+
+```{r}
+covid_data_detail %>% count(age_group) -> df_case_count_a
+
+ggplot(df_case_count_a, aes (x = reorder(age_group, n), y = n, fill = reorder(age_group, n) )) + geom_bar(stat = "identity") + scale_fill_viridis (discrete = TRUE, direction = -1) + scale_color_manual(values=c("black", "white")) + theme(axis.text.x = element_text(angle=45,hjust=1, size=8)) + xlab("Age Group\n") + ylab ("Total Cases\n") + labs(fill = "Age Group") + ggtitle("Count summary for number of cases by Age Group")
+
+```
+
+
+
+```{r}
+covid_data_detail %>% ggplot(mapping = aes (x = death_yn , fill = underlying_conditions_yn )) + geom_bar(position = "fill") + ylab("Death Percentage\n") + xlab("\n Death?") + theme(axis.text.x = element_text(angle=0,size=8)) + ggtitle ("Death vs Underlying Condition") + labs(fill = "Underlying Condition Exists") 
+```
+
+
+
+
+
+
+
+
